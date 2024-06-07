@@ -1,3 +1,4 @@
+/* eslint-disable linebreak-style */
 import { booksData } from '../data/books';
 
 export const resolvers = {

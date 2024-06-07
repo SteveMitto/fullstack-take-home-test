@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+/* eslint-disable linebreak-style */
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
 import { typeDefs } from './schema';
