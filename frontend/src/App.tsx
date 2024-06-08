@@ -5,6 +5,7 @@ import Sidebar from './components/Sidebar/Sidebar';
 import { Box, Container, createTheme, Grid } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
+import Books from './components/Books/Books';
 declare module '@mui/material/styles' {
   // allow configuration using `createTheme`
   interface ThemeOptions {
@@ -43,14 +44,14 @@ function App() {
         <Grid container spacing={0}>
           <Grid
             height={"100vh"}
-            bgcolor={(theme) => theme.primary.steelBlue}
+            bgcolor={(theme:any) => theme.primary.steelBlue}
             md={2}
             sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
             
             <Sidebar />
           </Grid>
           <Grid md={9}>
-            <h1>Hi</h1>
+            <Books />
           </Grid>
         </Grid>
       </Box>
