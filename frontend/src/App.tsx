@@ -63,7 +63,7 @@ function App() {
 
               <Sidebar />
             </Grid>
-            <Grid md={10}>
+            <Grid md={10} height={"100vh"} maxHeight={"100vh"} overflow="hidden">
               <Books />
             </Grid>
           </Grid>
