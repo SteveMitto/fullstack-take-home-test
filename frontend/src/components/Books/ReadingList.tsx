@@ -6,7 +6,7 @@ function ReadingList(props: any) {
     return (
         <Modal
             open={props.open}
-            onClose={()=>props.handleClose}
+            onClose={props.handleClose}
             aria-labelledby="modal-modal-title"
             aria-describedby="modal-modal-description"
         >
@@ -16,7 +16,7 @@ function ReadingList(props: any) {
                         Students Reading List
                     </Typography>
                     <List>
-                        { props.readingList
+                        { props.readingList.length > 0
                             ? props.readingList.map(book => (
                                 <ListItem key={book.title}
                                     secondaryAction={

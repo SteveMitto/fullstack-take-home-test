@@ -41,6 +41,7 @@ function Books() {
   const [readingList, setReadingList] = useState<BookType[] | []>([])
   const [filteredBooks, setFilteredBooks] = useState<BookType[] | []>([])
   const [snackbar, setSnackbar] = React.useState<SnackbarData>({ open: false, message: '', type: '' });
+  
   const { data }: { data: any } = useQuery({
     queryKey: ['books'],
     queryFn: async () => request('http://localhost:4000/books', allBooks)
@@ -90,8 +91,16 @@ function Books() {
     setSnackbar({ open: false, message: '', type: '' })
   }
 
+  const removeBook = (title) => {
+    const bookExists = readingList.find(book => book.title === title )
+    if(bookExists){
+      setReadingList(init => init.filter(book => book.title !== title))
+      setSnackbar({ open: true, message: "Removed " + title, type: "error" })
+
+    }
+  }
   const handleModalClose = () => setOpenModal(false)
-  const handleOpen = () => setOpenModal(true);
+  const handleModalOpen = () => setOpenModal(true);
   return (
     <Stack position="relative" pt={10} width="100%" maxHeight={'100vh'}>
       {/* Title */}
@@ -111,7 +120,7 @@ function Books() {
         </Grid>
 
         <Grid item="item" md={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
-          <Button onClick={()=>handleOpen()}>
+          <Button onClick={handleModalOpen}>
             <Typography color={(theme) => theme.primary.steelBlue} fontWeight={"500"}>Student Reading List</Typography>
             <Badge badgeContent={readingList.length} color='primary'>
               <ViewListIcon style={{ color: "#335C6E" }} />
@@ -147,7 +156,7 @@ function Books() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <ReadingList open={openModal} handleClose={handleModalClose} readingList={readingList}/>
+      <ReadingList open={openModal} handleClose={handleModalClose} removeBook={removeBook} readingList={readingList}/>
     </Stack>
   )
 }
