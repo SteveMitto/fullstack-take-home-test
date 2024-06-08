@@ -58,8 +58,11 @@ function Books() {
   }
   return (
     <Stack position="relative" width="100%" spacing={2} maxHeight={'100vh'}>
-      <Box bgcolor="#FFFFFF" p={3} position="fixed" zIndex={10} width="100%" top="0px" display="flex" gap="10%">
-        <Box fontWeight={700} fontSize={40} color={(theme: any) => theme.primary.steelBlue}>Books</Box>
+      <Box bgcolor="#FFFFFF" p={3} position="fixed" zIndex={10} width="100%" top="0px" display="flex" gap="10%" 
+        sx={{ background: { xs:'#335C6E', md: '#FFFFFF' } }}     >
+        <Box fontWeight={700} fontSize={40} color={(theme: any) => theme.primary.steelBlue}
+          sx={{ color: { xs:"#53C2C2", md: '#335C6E' } }}
+          >Books</Box>
         <Box width="50%" display="flex" alignItems='center'>
           {/* <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /> */}
           <TextField value={searchTerm}
