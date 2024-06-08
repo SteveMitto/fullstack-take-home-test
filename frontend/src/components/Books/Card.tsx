@@ -9,7 +9,7 @@ interface BookType {
     readingLevel: string;
 }
 
-function BookCard({ books }: { books: BookType[] }) {
+function BookCard({ books, handleClick }: { books: BookType[], handleClick: any }) {
 
     // const [allBooks,setAllBooks]=useState(books)
     
@@ -28,8 +28,8 @@ function BookCard({ books }: { books: BookType[] }) {
                     <Typography fontWeight='bold' fontSize="14px" color={(theme) => theme.secondary.teal} gutterBottom>
                         {book.author}
                     </Typography>
-                    <Button style={{ padding: "2px 40px", background: "#FAAD00" }} variant="contained" size="small"
-                    >Assign</Button>
+                    <Button style={{ padding: "2px 40px", background: "#FAAD00" }} variant="contained" size="small" onClick={() => handleClick(book.title)}
+                    >Add</Button>
                 </CardContent>
             </Card>
         </Grid>

@@ -1,8 +1,9 @@
-import { Box, Pagination, Skeleton, Slide, Stack, TextField, useScrollTrigger } from '@mui/material'
+import { Alert, Badge, Box, Container, Pagination, Snackbar, Stack, TextField, Typography } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import request, { gql } from 'graphql-request'
 import { useQuery } from '@tanstack/react-query'
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
+import ViewListIcon from '@mui/icons-material/ViewList';
 
 import BookCard from './Card';
 
@@ -12,6 +13,13 @@ interface BookType {
   coverPhotoURL: string;
   readingLevel: string;
 }
+
+interface SnackbarData {
+  open: boolean;
+  message: string;
+  type: string;
+}
+
 const allBooks = gql`
   query {
     books {
@@ -28,8 +36,9 @@ function Books() {
   const [pageSize, setPageSize] = React.useState(0);
   const [page, setPage] = React.useState(1);
   const [books, setBooks] = useState<BookType[] | []>([])
+  const [readingList, setReadingList] = useState<BookType[] | []>([])
   const [filteredBooks, setFilteredBooks] = useState<BookType[] | []>([])
-  const trigger = useScrollTrigger();
+  const [snackbar, setSnackbar] = React.useState<SnackbarData>({ open: false, message: '', type: '' });
   const { data }: { data: any } = useQuery({
     queryKey: ['books'],
     queryFn: async () => request('http://localhost:4000/books', allBooks)
@@ -56,37 +65,80 @@ function Books() {
     setBooks(data.books.slice((value - 1) * pageSize, (value * pageSize)))
     document.getElementById("main")?.scrollTo(0, 0)
   }
+
+  function addToReadingList(title) {
+    if (title) {
+      const alreadyAdded = readingList.find(book => book.title === title)
+      if (!alreadyAdded) {
+        const foundBook = books.find(book => book.title === title)
+        if (foundBook) {
+          setReadingList(init => [...init, foundBook])
+          setSnackbar({ open: true, message: "Added " + title, type: "success" })
+        }
+      } else {
+        setSnackbar({ open: true, message: "Book already added ", type: "info" })
+      }
+
+      console.log(readingList);
+
+    }
+  }
+
+  function handleClose() {
+    setSnackbar({ open: false, message: '', type: '' })
+  }
   return (
-    <Stack position="relative" width="100%" spacing={2} maxHeight={'100vh'}>
-      <Box bgcolor="#FFFFFF" p={3} position="fixed" zIndex={10} width="100%" top="0px" display="flex" gap="10%" 
-        sx={{ background: { xs:'#335C6E', md: '#FFFFFF' } }}     >
-        <Box fontWeight={700} fontSize={40} color={(theme: any) => theme.primary.steelBlue}
-          sx={{ color: { xs:"#53C2C2", md: '#335C6E' } }}
-          >Books</Box>
-        <Box width="50%" display="flex" alignItems='center'>
-          {/* <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /> */}
-          <TextField value={searchTerm}
-            onChange={(event) => setSearchTerm(event.target.value)}
-            fullWidth id="input-with-sx" label="Find a book" size='small' variant="standard" />
-        </Box>
+    <Stack position="relative" pt={10} width="100%" maxHeight={'100vh'}>
+      {/* Title */}
+      <Box bgcolor="#FFFFFF" px={3} py={2} position="fixed" zIndex={10} width="100%" top="0px" display="flex" gap="10%" sx={{ background: { xs: '#335C6E', md: '#FFFFFF' }, boxShadow: "#CFFAFA 2px 3px 8px" }} >
+        <Box fontWeight={700} fontSize={35} color={(theme: any) => theme.primary.steelBlue} sx={{ color: { xs: "#53C2C2", md: '#335C6E' } }}>Books</Box>
       </Box>
-      <Box pt={13} px={3} sx={{overflowY:"scroll"}} id="main">
+
+      {/* Search & Reading List */}
+      <Grid container px={3} width="100%" pb={1}>
+        <Grid md={9} >
+          <Box width="50%" display="flex" alignItems='center'>
+            {/* <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /> */}
+            <TextField value={searchTerm}
+              onChange={(event) => setSearchTerm(event.target.value)}
+              fullWidth id="input-with-sx" label="Find a book" size='small' variant="standard" />
+          </Box>
+        </Grid>
+        <Grid md={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
+          <Typography color={(theme)=> theme.primary.steelBlue} fontWeight={"500"}>Student Reading List</Typography>
+          <Badge badgeContent={readingList.length} color='primary'>
+            <ViewListIcon style={{color:"#335C6E"}} />
+          </Badge>
+        </Grid>
+      </Grid>
+
+
+      <Box pt={1} px={3} sx={{ overflowY: "scroll" }} id="mainContent">
         <Grid container spacing={3}>
           {
             books
-              ? <BookCard books={filteredBooks.length > 0 ? filteredBooks : books} />
+              ? <BookCard books={filteredBooks.length > 0 ? filteredBooks : books} handleClick={addToReadingList} />
               : <></>
           }
         </Grid>
         {/* <Slide in={trigger} direction='up' timeout={{exit:1500}} > */}
-          {/* <Box position="fixed" bottom="40px" width="80%" display="flex" justifyContent="center" alignItems="center"> */}
-          <Box  my={5} width="100%" display="flex" justifyContent="center" alignItems="center">
-            <Box bgcolor="white" boxSizing="border-box" display="block" borderRadius="20px">
-              <Pagination count={pageSize} color="primary" page={page} onChange={handleChange} />
-            </Box>
+        {/* <Box position="fixed" bottom="40px" width="80%" display="flex" justifyContent="center" alignItems="center"> */}
+        <Box my={5} width="100%" display="flex" justifyContent="center" alignItems="center">
+          <Box bgcolor="white" boxSizing="border-box" display="block" borderRadius="20px">
+            <Pagination count={pageSize} color="primary" page={page} onChange={handleChange} />
           </Box>
+        </Box>
         {/* </Slide> */}
       </Box>
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleClose}>
+        <Alert
+          onClose={handleClose}
+          severity={snackbar.type}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Stack>
   )
 }
