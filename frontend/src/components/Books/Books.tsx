@@ -1,11 +1,12 @@
-import { Alert, Badge, Box, Container, Pagination, Snackbar, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Badge, Box, Button, Container, Pagination, Snackbar, Stack, TextField, Typography } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import request, { gql } from 'graphql-request'
 import { useQuery } from '@tanstack/react-query'
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import ViewListIcon from '@mui/icons-material/ViewList';
-
+import Modal from '@mui/material/Modal';
 import BookCard from './Card';
+import ReadingList from './ReadingList';
 
 interface BookType {
   title: string;
@@ -33,6 +34,7 @@ const allBooks = gql`
 
 function Books() {
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [openModal, setOpenModal] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(0);
   const [page, setPage] = React.useState(1);
   const [books, setBooks] = useState<BookType[] | []>([])
@@ -63,7 +65,7 @@ function Books() {
   const handleChange = (event: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     setBooks(data.books.slice((value - 1) * pageSize, (value * pageSize)))
-    document.getElementById("main")?.scrollTo(0, 0)
+    document.getElementById("mainContent")?.scrollTo(0, 0)
   }
 
   function addToReadingList(title) {
@@ -87,6 +89,9 @@ function Books() {
   function handleClose() {
     setSnackbar({ open: false, message: '', type: '' })
   }
+
+  const handleModalClose = () => setOpenModal(false)
+  const handleOpen = () => setOpenModal(true);
   return (
     <Stack position="relative" pt={10} width="100%" maxHeight={'100vh'}>
       {/* Title */}
@@ -96,7 +101,7 @@ function Books() {
 
       {/* Search & Reading List */}
       <Grid container px={3} width="100%" pb={1}>
-        <Grid md={9} >
+        <Grid item="item" md={9} >
           <Box width="50%" display="flex" alignItems='center'>
             {/* <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /> */}
             <TextField value={searchTerm}
@@ -104,11 +109,14 @@ function Books() {
               fullWidth id="input-with-sx" label="Find a book" size='small' variant="standard" />
           </Box>
         </Grid>
-        <Grid md={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
-          <Typography color={(theme)=> theme.primary.steelBlue} fontWeight={"500"}>Student Reading List</Typography>
-          <Badge badgeContent={readingList.length} color='primary'>
-            <ViewListIcon style={{color:"#335C6E"}} />
-          </Badge>
+
+        <Grid item="item" md={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
+          <Button onClick={()=>handleOpen()}>
+            <Typography color={(theme) => theme.primary.steelBlue} fontWeight={"500"}>Student Reading List</Typography>
+            <Badge badgeContent={readingList.length} color='primary'>
+              <ViewListIcon style={{ color: "#335C6E" }} />
+            </Badge>
+          </Button>
         </Grid>
       </Grid>
 
@@ -139,6 +147,7 @@ function Books() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <ReadingList open={openModal} handleClose={handleModalClose} readingList={readingList}/>
     </Stack>
   )
 }
