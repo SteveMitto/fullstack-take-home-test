@@ -6,6 +6,7 @@ import { Box, Container, createTheme, Grid } from '@mui/material';
 import { ThemeProvider } from '@mui/material';
 import Grid2 from '@mui/material/Unstable_Grid2/Grid2';
 import Books from './components/Books/Books';
+import { QueryClient, QueryClientProvider, useQuery } from '@tanstack/react-query';
 declare module '@mui/material/styles' {
   // allow configuration using `createTheme`
   interface ThemeOptions {
@@ -19,10 +20,18 @@ declare module '@mui/material/styles' {
       orangeRed?: string;
       teal?: string;
       yellowDark?: string;
+
     }
   }
 }
 const theme = createTheme({
+  typography: {
+    allVariants: {
+      fontFamily: 'Mulish',
+      textTransform: 'none',
+      fontSize: 16,
+    },
+  },
   primary: {
     turquoise: "#53C2C2",
     steelBlue: "#335C6E",
@@ -32,30 +41,35 @@ const theme = createTheme({
   secondary: {
     orangeRed: "#F76434",
     teal: "#4AA088",
-    yellowDark: "#FAAD00",
+    yellowDark: "#FAAD00"
   }
 });
 
 function App() {
 
+  const queryClient = new QueryClient()
   return (
-    <ThemeProvider theme={theme}>
-      <Box maxHeight="100vh">
-        <Grid container spacing={0}>
-          <Grid
-            height={"100vh"}
-            bgcolor={(theme:any) => theme.primary.steelBlue}
-            md={2}
-            sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
-            
-            <Sidebar />
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider theme={theme}>
+        <Box maxHeight="100vh">
+          <Grid container spacing={0}>
+            <Grid
+              item
+              position='relative'
+              height={"100vh"}
+              bgcolor={(theme: any) => theme.primary.steelBlue}
+              md={2}
+              sx={{ display: { xs: 'none', sm: 'none', md: 'block' } }}>
+
+              <Sidebar />
+            </Grid>
+            <Grid md={10}>
+              <Books />
+            </Grid>
           </Grid>
-          <Grid md={9}>
-            <Books />
-          </Grid>
-        </Grid>
-      </Box>
-    </ThemeProvider>
+        </Box>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
