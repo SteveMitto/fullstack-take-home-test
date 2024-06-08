@@ -17,3 +17,8 @@ code {
 *{
   box-sizing: border-box;
 }
+
+.css-1wcupr-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected {
+  color: #fff;
+  background-color: #FAAD00 !important;
+}
