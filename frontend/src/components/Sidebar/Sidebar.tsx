@@ -1,6 +1,6 @@
 import { Box, Divider, Link, Stack } from '@mui/material'
 import React, { useState, useEffect, useMemo } from 'react'
-import logo from "../../assets/logo.png"
+import logo from "../../logo.png"
 import BookIcon from '@mui/icons-material/Book';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 
@@ -13,7 +13,7 @@ interface NavItems {
 function Sidebar() {
     const [active, setActive] = useState<number>(0);
     const navigationItems: NavItems[] = useMemo(() => [
-        { id: 0, name: "Dasshboard", path: "/dashboard" },
+        { id: 0, name: "Dashboard", path: "/dashboard" },
         { id: 1, name: "Books", path: "/" },
     ], [])
 
@@ -25,7 +25,12 @@ function Sidebar() {
     }, [navigationItems])
 
     return (
-        <Box px={2} overflow="hidden">
+        <Box px={2}
+            overflow="hidden"
+            height={"100vh"}
+            width="100%"
+            bgcolor={(theme: any) => theme.primary.steelBlue}
+            position='sticky' top='0' left='0'>
             <Box my={2} display="flex" justifyItems={"center"}>
                 <img src={logo} style={{ margin: "auto" }} alt="logo" width={"100"} />
             </Box>
@@ -40,7 +45,7 @@ function Sidebar() {
 }
 
 
-function navigationItemsComp(navItems, active){
+function navigationItemsComp(navItems, active) {
     return navItems.map(item => (
         <Link key={item.id} py={1} href={item.path} color={(theme) => active === item.id ? theme.secondary.yellowDark : theme.primary.turquoise} underline="none">
             <Box display="flex" sx={{ width: "100%", display: "flex", alignItems: "center" }}>

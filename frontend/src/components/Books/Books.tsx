@@ -1,12 +1,14 @@
-import { Alert, Badge, Box, Button, Container, Pagination, Snackbar, Stack, TextField, Typography } from '@mui/material'
+import { Alert, Badge, Box, Button, Fade, IconButton, Pagination, Slide, Snackbar, Stack, TextField, Typography } from '@mui/material'
 import React, { useState, useEffect } from 'react'
 import request, { gql } from 'graphql-request'
 import { useQuery } from '@tanstack/react-query'
 import Grid from '@mui/material/Unstable_Grid2/Grid2';
 import ViewListIcon from '@mui/icons-material/ViewList';
-import Modal from '@mui/material/Modal';
 import BookCard from './Card';
 import ReadingList from './ReadingList';
+import CloseIcon from '@mui/icons-material/Close';
+import SearchIcon from '@mui/icons-material/Search';
+import PaginationComponent from './Pagination';
 
 interface BookType {
   title: string;
@@ -19,6 +21,7 @@ interface SnackbarData {
   open: boolean;
   message: string;
   type: string;
+  action: string;
 }
 
 const allBooks = gql`
@@ -34,14 +37,16 @@ const allBooks = gql`
 
 function Books() {
   const [searchTerm, setSearchTerm] = useState<string>('')
+  const [showSearch, setShowSearch] = useState<boolean>(false)
   const [openModal, setOpenModal] = React.useState(false);
   const [pageSize, setPageSize] = React.useState(0);
   const [page, setPage] = React.useState(1);
   const [books, setBooks] = useState<BookType[] | []>([])
   const [readingList, setReadingList] = useState<BookType[] | []>([])
   const [filteredBooks, setFilteredBooks] = useState<BookType[] | []>([])
-  const [snackbar, setSnackbar] = React.useState<SnackbarData>({ open: false, message: '', type: '' });
-  
+  const [snackbar, setSnackbar] = React.useState<SnackbarData>({ open: false, message: '', type: '', action: '' });
+  const [showText, setShowText] = useState(false)
+
   const { data }: { data: any } = useQuery({
     queryKey: ['books'],
     queryFn: async () => request('http://localhost:4000/books', allBooks)
@@ -76,10 +81,10 @@ function Books() {
         const foundBook = books.find(book => book.title === title)
         if (foundBook) {
           setReadingList(init => [...init, foundBook])
-          setSnackbar({ open: true, message: "Added " + title, type: "success" })
+          setSnackbar({ open: true, message: "Added " + title, type: "success", action: '' })
         }
       } else {
-        setSnackbar({ open: true, message: "Book already added ", type: "info" })
+        setSnackbar({ open: true, message: "Book already added ", type: "info", action: '' })
       }
 
       console.log(readingList);
@@ -88,75 +93,113 @@ function Books() {
   }
 
   function handleClose() {
-    setSnackbar({ open: false, message: '', type: '' })
+    setSnackbar({ open: false, message: '', type: '', action: '' })
   }
 
   const removeBook = (title) => {
-    const bookExists = readingList.find(book => book.title === title )
-    if(bookExists){
+    const bookExists = readingList.find(book => book.title === title)
+    if (bookExists) {
       setReadingList(init => init.filter(book => book.title !== title))
-      setSnackbar({ open: true, message: "Removed " + title, type: "error" })
+      setSnackbar({ open: true, message: "Removed " + title, type: "error", action: 'delete' })
 
     }
   }
-  const handleModalClose = () => setOpenModal(false)
+  const handleModalClose = () => {
+    setOpenModal(false)
+  }
   const handleModalOpen = () => setOpenModal(true);
+
+  const toggleText = () => setShowText(init => !init)
+
+  const hideSearch = () => {
+    setShowSearch(false)
+    setSearchTerm('')
+  }
   return (
     <Stack position="relative" pt={10} width="100%" maxHeight={'100vh'}>
       {/* Title */}
-      <Box bgcolor="#FFFFFF" px={3} py={2} position="fixed" zIndex={10} width="100%" top="0px" display="flex" gap="10%" sx={{ background: { xs: '#335C6E', md: '#FFFFFF' }, boxShadow: "#CFFAFA 2px 3px 8px" }} >
-        <Box fontWeight={700} fontSize={35} color={(theme: any) => theme.primary.steelBlue} sx={{ color: { xs: "#53C2C2", md: '#335C6E' } }}>Books</Box>
+      <Box
+        bgcolor="#FFFFFF"
+        px={3} py={2}
+        position="fixed" zIndex={10} top="0px"
+        display="flex" justifyContent='space-between'
+        width="-webkit-fill-available" gap="10%" sx={{ background: { xs: '#335C6E', md: '#FFFFFF' }, boxShadow: "#CFFAFA 2px 3px 8px" }} >
+        <Typography fontWeight={900} fontSize={35} color={(theme: any) => theme.primary.steelBlue} sx={{ color: { xs: "#53C2C2", md: '#335C6E' } }}>Books</Typography>
+        <Button onClick={() => setShowSearch(true)}>
+          <Box display='flex' gap="10px" alignItems='center' color={(theme: any) => theme.primary.yellowDark}>
+            <Typography fontSize={15} color={(theme: any) => theme.secondary.yellowDark} sx={{ display: { xs: 'none', md: 'block' }, color: { md: "#335C6E" } }}>Search</Typography>
+            <SearchIcon sx={{ color: '#FAAD00', fontWeight: 'bold', fontSize: "40px", mb: -1 }} />
+          </Box>
+        </Button>
       </Box>
 
-      {/* Search & Reading List */}
-      <Grid container px={3} width="100%" pb={1}>
-        <Grid item="item" md={9} >
-          <Box width="50%" display="flex" alignItems='center'>
-            {/* <SearchIcon sx={{ color: 'action.active', mr: 1, my: 0.5 }} /> */}
+      {/* Search */}
+      <Slide direction="down" in={showSearch} mountOnEnter unmountOnExit>
+        <Box px={3} py={1}>
+          <Box display='flex' pb={1} justifyContent='between' alignItems='center'>
             <TextField value={searchTerm}
-              onChange={(event) => setSearchTerm(event.target.value)}
-              fullWidth id="input-with-sx" label="Find a book" size='small' variant="standard" />
+              onChange={(event) => setSearchTerm(event.target.value)} id="input-with-sx" label="Find a book" size='small' variant="standard"
+              sx={{ textAlign: 'center', width: '90%' }}
+            />
+            <Button sx={{ display: 'grid', fontSize: 10, pt: -1, placeItems: 'center', width: '20px', height: '20px', p: 0, color: 'white', background: 'rgba(200,0,0,.5)', minWidth: 'fit-content', borderRadius: "50px" }} onClick={() => hideSearch()}>X</Button>
           </Box>
-        </Grid>
-
-        <Grid item="item" md={3} display="flex" justifyContent="flex-end" alignItems="center" gap={2}>
-          <Button onClick={handleModalOpen}>
-            <Typography color={(theme) => theme.primary.steelBlue} fontWeight={"500"}>Student Reading List</Typography>
-            <Badge badgeContent={readingList.length} color='primary'>
-              <ViewListIcon style={{ color: "#335C6E" }} />
-            </Badge>
-          </Button>
-        </Grid>
-      </Grid>
-
-
-      <Box pt={1} px={3} sx={{ overflowY: "scroll" }} id="mainContent">
-        <Grid container spacing={3}>
-          {
-            books
-              ? <BookCard books={filteredBooks.length > 0 ? filteredBooks : books} handleClick={addToReadingList} />
-              : <></>
-          }
-        </Grid>
-        {/* <Slide in={trigger} direction='up' timeout={{exit:1500}} > */}
-        {/* <Box position="fixed" bottom="40px" width="80%" display="flex" justifyContent="center" alignItems="center"> */}
-        <Box my={5} width="100%" display="flex" justifyContent="center" alignItems="center">
-          <Box bgcolor="white" boxSizing="border-box" display="block" borderRadius="20px">
-            <Pagination count={pageSize} color="primary" page={page} onChange={handleChange} />
-          </Box>
+          <Typography>
+            {filteredBooks.length > 0 ? `Found + ${filteredBooks.length}  ${filteredBooks.length === 1 ? 'book' : 'books'}` : ''}
+          </Typography>
         </Box>
-        {/* </Slide> */}
+      </Slide>
+
+      {/* Cards  */}
+      <Box pt={3} px={3} sx={{ overflowY: "scroll" }} id="mainContent">
+        <Grid container spacing={3} >
+          {/* NB: Add Skeleton */}
+          {books ? <BookCard books={filteredBooks.length > 0 ? filteredBooks : books} handleClick={addToReadingList} /> : <></>}
+        </Grid>
+        {/* Pagination */}
+        <PaginationComponent
+          pageSize={pageSize}
+          page={page}
+          handleChange={handleChange}
+        />
       </Box>
-      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleClose}>
-        <Alert
-          onClose={handleClose}
-          severity={snackbar.type}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
+
+      {/* ReadingList */}
+      <ReadingList
+        open={openModal}
+        closeModal={handleModalClose}
+        removeBook={removeBook}
+        readingList={readingList}
+        showText={showText}
+        handleModalOpen={handleModalOpen}
+        toggleText={toggleText}
+      />
+
+      <Snackbar open={snackbar.open} autoHideDuration={6000} onClose={handleClose}
+        message={snackbar.action === 'delete' ? snackbar.message : undefined}
+        action={snackbar.action === 'delete' ?
+          <React.Fragment>
+            <Button color="secondary" size="small" onClick={handleClose}>
+              UNDO
+            </Button>
+            <IconButton
+              aria-label="close"
+              color="inherit"
+              sx={{ p: 0.5 }}
+              onClick={handleClose}
+            >
+              <CloseIcon />
+            </IconButton>
+          </React.Fragment>
+          : null}
+      >
+
+        {snackbar.action !== 'delete'
+          ? <Alert onClose={handleClose} severity={snackbar.type} sx={{ width: '100%' }} >
+            {snackbar.message}
+          </Alert>
+          : <Typography>{snackbar.message}</Typography>
+        }
       </Snackbar>
-      <ReadingList open={openModal} handleClose={handleModalClose} removeBook={removeBook} readingList={readingList}/>
     </Stack>
   )
 }

@@ -27,10 +27,10 @@ function BookCard({ books, handleClick }: { books: BookType[], handleClick: any 
                         </Box>
                     </CardMedia>
                     <CardContent >
-                        <Typography fontWeight='bold' fontSize="18px" color={(theme) => theme.primary.steelBlue} gutterBottom variant="h5" component="div">
+                        <Typography fontWeight='bold' fontSize="18px" color={(theme:any) => theme.primary.steelBlue} gutterBottom variant="h5" component="div">
                             {book.title}
                         </Typography>
-                        <Typography fontWeight='bold' fontSize="14px" color={(theme) => theme.secondary.teal} gutterBottom>
+                        <Typography fontWeight='bold' fontSize="14px" color={(theme:any) => theme.secondary.teal} gutterBottom>
                             {book.author}
                         </Typography>
                         <Button style={{ padding: "2px 40px", background: "#FAAD00" }} variant="contained" size="small" onClick={() => handleClick(book.title)}
